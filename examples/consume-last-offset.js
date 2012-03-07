@@ -17,22 +17,73 @@
  *
  * See Consumer.js for a more realistic use case
  */
-var kafka = require('kafka')
+
+ // Do this very early so all exceptions can be caught
+ process.on('uncaughtException', function (err) {
+     // if (nodeServer) {
+         //   nodeServer.sendFailureCount++;
+             // }
+                 console.log('ERROR: Caught exception: ' + err);
+                     console.log(err.stack.split('\n'));
+                     });
+
+var kafka = require('../kafka')
+var optimist = require('../../optimist')
+    .usage('Consume a topic from the most recent message\nUsage: $0')
+    .options('h', {
+        alias: 'host',
+        default: 'localhost'
+    })
+    .options('p', {
+        alias: 'port',
+        default: '9092',
+    })
+    .options('t', {
+        alias: 'topic',
+        default: 'testtopic'
+    })
+var argv = optimist.argv
+
+if (argv.help) {
+    optimist.showHelp(console.error)
+    process.exit()
+}
 
 var client = new kafka.Client({
-    host:'localhost',
-    port:9092,
+    host:argv.host,
+    port:argv.port,
 })
 
+client.on('connecting', function(address) {
+    console.error("Connecting to " + address)
+})
+client.on('connected', function(address) {
+    console.error("Connected to " + address)
+})
+client.on('disconnected', function(address) {
+    console.error("Disconnected from " + address)
+})
+client.on('connection_error', function(address, error) {
+    console.error("Couldn't connect to " + address + " (" + error + ")")
+})
+client.on('error', function(address, err) {
+    console.error("Couldn't connect to " + address)
+})
 client.on('message', function(topic, message, offset) {
-    console.log("Consumed topic:" + topic + " message:" + message)
+    console.log("Consumed topic:" + topic + " message:" + message + " offset: " + offset)
 })
 client.on('lastmessage', function(topic, offset) {
-    client.fetchTopic({name: topic, offset: offset})
+    setTimeout(function() { client.fetchTopic({name: topic, offset: offset})}, 100)
+})
+client.on('offset', function(topic, offset) {
+    console.error("offset: " + topic + " offset: " + offset)
 })
 client.on('lastoffset', function(topic, offset) {
+    console.error("last offset: " + topic + " offset: " + offset)
     client.fetchTopic({name: topic, offset: offset})
 })
-client.connect(function() { 
-    client.fetchOffsets('test')
+client.on('connected', function() {
+    console.error('Fetching topic ', argv.topic)
+    client.fetchOffsets({name: argv.topic, offsets: 1})
 })
+client.connect()

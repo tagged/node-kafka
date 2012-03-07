@@ -29,7 +29,8 @@ client.on('message', function(topic, message, offset) {
 
 })
 client.on('lastmessage', function(topic, offset) {
-    client.fetchTopic({name: topic, offset: offset})
+      console.log('lastmessage')
+      //client.fetchTopic({name: topic, offset: offset})
 })
 client.connect(function() { 
     client.fetchTopic({name: "test", offset: 0})
