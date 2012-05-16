@@ -1,8 +1,8 @@
 {
-  "name": "kafka",
-  "description": "A node client for Kafka",
-  "version": "0.1.7",
-  "homepage": "https://github.com/marcuswestin/node-kafka",
+  "name": "kafka-fork",
+  "description": "A node client for Kafka. My fork with a fix for #5, since I couldn't wait for pull request for too long",
+  "version": "0.1.8",
+  "homepage": "https://github.com/yankov/node-kafka",
   "author": "Marcus Westin <narcvs@gmail.com> (http://marcuswest.in)",
   "repository": {
     "type": "git",
